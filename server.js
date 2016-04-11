@@ -38,6 +38,18 @@ app.post('/todos',function(req,res){
 	res.json(body);
 });
 
+app.delete('/todos/:id',function(req,res){
+	var todoitem = parseInt(req.params.id,10);
+	var matchedtodo = _.findWhere(todos,{id:todoitem});
+	 if(matchedtodo)
+	 {
+	 	todos = _.without(todos,matchedtodo);
+	 	res.json(matchedtodo);
+	 }else{
+	 	res.status(404).json({"error":"no todo found with that id"});
+	 }
+});
+
 app.listen(PORT,function(){
 	console.log('server listening to port:'+PORT);
 });
