@@ -119,7 +119,7 @@ app.post('/users/login', function(req, res) {
 	db.user.authenticate(body).then(function(user) {
 		res.json(user.toPublicJSON());
 	}, function(e) {
-		res.status(401), send();
+		res.status(401).send();
 	});
 });
 
