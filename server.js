@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
 var bcrypt = require('bcrypt');
+var middlware = require('./middleware.js')(db);
 var app = express();
 var PORT = process.env.PORT || 3000;
 var todos = [];
@@ -14,7 +15,7 @@ app.get('/', function(req, res) {
 	res.send('Todo API Root');
 });
 
-app.get('/todos', function(req, res) {
+app.get('/todos', middlware.requireAuthentication, function(req, res) {
 	var query = req.query;
 	var where = {};
 	if (query.hasOwnProperty('completed') && query.completed === 'true') {
@@ -36,7 +37,7 @@ app.get('/todos', function(req, res) {
 	});
 });
 
-app.get('/todos/:id', function(req, res) {
+app.get('/todos/:id', middlware.requireAuthentication, function(req, res) {
 	var todoitem = parseInt(req.params.id, 10);
 	db.todo.findById(todoitem).then(function(todo) {
 		if (!!todo) {
@@ -49,7 +50,7 @@ app.get('/todos/:id', function(req, res) {
 	});
 });
 
-app.post('/todos', function(req, res) {
+app.post('/todos', middlware.requireAuthentication, function(req, res) {
 	var body = _.pick(req.body, "description", "completed");
 	db.todo.create(body).then(function(todo) {
 		res.json(todo.toJSON());
@@ -58,7 +59,7 @@ app.post('/todos', function(req, res) {
 	});
 });
 
-app.delete('/todos/:id', function(req, res) {
+app.delete('/todos/:id', middlware.requireAuthentication, function(req, res) {
 	var todoitem = parseInt(req.params.id, 10);
 	db.todo.destroy({
 		where: {
@@ -77,7 +78,7 @@ app.delete('/todos/:id', function(req, res) {
 	});
 });
 
-app.put('/todos/:id', function(req, res) {
+app.put('/todos/:id', middlware.requireAuthentication, function(req, res) {
 	var body = _.pick(req.body, "description", "completed");
 	var todoitem = parseInt(req.params.id, 10);
 	var attributes = {};
