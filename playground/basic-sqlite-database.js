@@ -20,22 +20,39 @@ var Todos = sequelize.define('todo', {
 	}
 });
 
-sequelize.sync().then(function() {
+var User = sequelize.define('user', {
+	email: Sequelize.STRING
+});
+
+Todos.belongsTo(User);
+User.hasMany(Todos);
+
+sequelize.sync({
+	//force: true
+}).then(function() {
 	console.log('Everything is synced');
-	Todos.create({
-		description: 'walking the dog',
-		completed: false
-	}).then(function(todo) {
-		return Todos.create({
-			description: 'clean the office',
+	User.findById(1).then(function(user) {
+		user.getTodos({
+			where:{
+				completed:false
+			}
+		}).then(function(todos) {
+			todos.forEach(function(todo) {
+				console.log(todo.toJSON());
+			});
 		});
-	}).then(function() {
-		return Todos.findById(1);
-	}).then(function(todo) {
-		if (true) {
-			console.log(todo.toJSON());
-		} else {
-			console.log('no to do found');
-		}
 	});
+	/*
+	User.create({
+		email: 'test@test'
+	}).then(function() {
+		return Todos.create({
+			description: 'clear'
+		});
+	}).then(function(todo) {
+		User.findById(1).then(function(user) {
+			user.addTodos(todo);
+		});
+	});
+*/
 });

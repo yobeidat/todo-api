@@ -53,7 +53,11 @@ app.get('/todos/:id', middlware.requireAuthentication, function(req, res) {
 app.post('/todos', middlware.requireAuthentication, function(req, res) {
 	var body = _.pick(req.body, "description", "completed");
 	db.todo.create(body).then(function(todo) {
-		res.json(todo.toJSON());
+		req.user.addTodo(todo).then(function() {
+			return todo.reload();
+		}).then(function(todo) {
+			res.json(todo.toJSON());
+		});
 	}, function(e) {
 		res.status(404).json(e);
 	});
