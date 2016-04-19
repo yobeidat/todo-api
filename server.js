@@ -17,7 +17,9 @@ app.get('/', function(req, res) {
 
 app.get('/todos', middlware.requireAuthentication, function(req, res) {
 	var query = req.query;
-	var where = {};
+	var where = {
+		userId: req.user.get('id')
+	};
 	if (query.hasOwnProperty('completed') && query.completed === 'true') {
 		where.completed = true;
 	} else if (query.hasOwnProperty('completed') && query.completed === 'false') {
@@ -39,7 +41,12 @@ app.get('/todos', middlware.requireAuthentication, function(req, res) {
 
 app.get('/todos/:id', middlware.requireAuthentication, function(req, res) {
 	var todoitem = parseInt(req.params.id, 10);
-	db.todo.findById(todoitem).then(function(todo) {
+	db.todo.findOne({
+		where: {
+			id: todoitem,
+			userId: req.user.get('id')
+		}
+	}).then(function(todo) {
 		if (!!todo) {
 			res.json(todo.toJSON());
 		} else {
@@ -67,7 +74,8 @@ app.delete('/todos/:id', middlware.requireAuthentication, function(req, res) {
 	var todoitem = parseInt(req.params.id, 10);
 	db.todo.destroy({
 		where: {
-			id: todoitem
+			id: todoitem,
+			userId: req.user.get('id')
 		}
 	}).then(function(rowsDeleted) {
 		if (rowsDeleted === 0) {
@@ -93,7 +101,12 @@ app.put('/todos/:id', middlware.requireAuthentication, function(req, res) {
 	if (body.hasOwnProperty('description')) {
 		attributes.description = body.description;
 	}
-	db.todo.findById(todoitem).then(function(todo) {
+	db.todo.findOne({
+		where: {
+			id: todoitem,
+			userId: req.user.get('id')
+		}
+	}).then(function(todo) {
 		if (todo) {
 			todo.update(attributes).then(function(todo) {
 				res.json(todo.toJSON());
